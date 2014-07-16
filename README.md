@@ -1,7 +1,7 @@
 CDS Pricing Model
 =================
 
-Implementation of a simplified top CDS Pricing Model for expiramentation
+Implementation of a simplified CDS Pricing Model for experimentation
 
 
 Development Environment Setup Notes
