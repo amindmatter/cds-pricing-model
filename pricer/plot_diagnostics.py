@@ -34,6 +34,18 @@ def generate_diagnositic_plots():
     plt.close()
 
     plt.figure()
+    for coupon in [0.01, 0.05]:
+        frm = calc_at_varying_hazard_rates(coupon=coupon)
+        plt.plot(frm.ParSpread, frm.PUF,
+                 label='%s Bps Coupon' % (int(coupon * 1.0e4)))
+    plt.title('PUF vs ParSpread')
+    plt.xlabel('ParSpread')
+    plt.ylabel('PUF')
+    plt.legend(loc="lower right")
+    pdf.savefig()
+    plt.close()
+
+    plt.figure()
     frm = calc_at_varying_maturities()
     plt.plot(frm.Maturity, frm.RPV01)
     plt.title('RPV01 vs Maturity')
@@ -57,13 +69,14 @@ def generate_diagnositic_plots():
     pdf.close()
 
 
-def calc_at_varying_hazard_rates(recovery=0.4):
+def calc_at_varying_hazard_rates(recovery=0.4, coupon=0.01):
     haz_rates = np.linspace(0.0, 0.10)
     pufs = []
     parspreads = []
     for hz in haz_rates:
         cdsflat = generic_inputs(haz_rate=hz)
         cdsflat.recovery_rate = recovery
+        cdsflat.coupon = coupon
         val = calcs.Valuation(cdsflat)
         pufs.append(val.puf())
         parspreads.append(val.parspread())
