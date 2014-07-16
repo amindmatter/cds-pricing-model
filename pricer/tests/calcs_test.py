@@ -8,7 +8,7 @@ class TestValuation(unittest.TestCase):
     def setUp(self):
         disc_factors = inputs.FlatCurve(0.05)
         survival_curve = inputs.FlatCurve(0.01666666)
-        self.cdsflat = inputs.ValuationInput(0.01, 5.0, 10.e6, 0.4,
+        self.cdsflat = inputs.ValuationInput(0.01, 5.0, 1.0, 0.4,
                                              disc_factors, survival_curve)
 
     def test_premium_leg(self):
@@ -23,6 +23,10 @@ class TestValuation(unittest.TestCase):
     def test_parspread(self):
         val = calcs.Valuation(self.cdsflat)
         self.assertAlmostEqual(val.parspread(), 0.009789, 5)
+        
+    def test_puf(self):
+        val = calcs.Valuation(self.cdsflat)
+        self.assertAlmostEqual(val.puf(), -0.0008898, 5)
 
 if __name__ == '__main__':
     unittest.main()
