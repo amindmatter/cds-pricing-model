@@ -20,7 +20,8 @@ class Valuation():
         loss_given_default = (1.0 - self.inputs.recovery_rate)
         hazard = -1 * cf.diff(1).SurvivalProb
         hazard[0] = 0.0
-        return self.inputs.notional * loss_given_default * (hazard * cf.DiscountFactor).sum()
+        unit_pv = loss_given_default * (hazard * cf.DiscountFactor).sum()
+        return self.inputs.notional * unit_pv
 
     def puf(self):
         return self.pv_protection_leg() - self.pv_premium_leg()

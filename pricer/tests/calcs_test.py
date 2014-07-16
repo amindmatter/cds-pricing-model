@@ -23,7 +23,7 @@ class TestValuation(unittest.TestCase):
     def test_parspread(self):
         val = calcs.Valuation(self.cdsflat)
         self.assertAlmostEqual(val.parspread(), 0.009789, 5)
-        
+
     def test_puf(self):
         val = calcs.Valuation(self.cdsflat)
         self.assertAlmostEqual(val.puf(), -0.0008898, 5)

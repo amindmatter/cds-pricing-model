@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-
 from pricer import inputs
 from pricer import calcs
 
@@ -13,10 +12,23 @@ def generate_diagnositic_plots():
     plt.figure()
     for reca in [0.4, 0.6, 0.8]:
         frm = calc_at_varying_hazard_rates(reca)
-        plt.plot(frm.HazardRate, frm.PUF, label='%s%% Recovery' % (reca * 100))
+        plt.plot(frm.HazardRate, frm.PUF,
+                 label='%s%% Recovery' % (reca * 100))
     plt.title('PUF vs Default Intensity Rate')
     plt.xlabel('Default Intensity Rate')
     plt.ylabel('PUF')
+    plt.legend(loc="lower right")
+    pdf.savefig()
+    plt.close()
+
+    plt.figure()
+    for reca in [0.4, 0.6, 0.8]:
+        frm = calc_at_varying_hazard_rates(reca)
+        plt.plot(frm.HazardRate, frm.ParSpread,
+                 label='%s%% Recovery' % (reca * 100))
+    plt.title('Par Spread vs Default Intensity Rate')
+    plt.xlabel('Default Intensity Rate')
+    plt.ylabel('Par Spread')
     plt.legend(loc="lower right")
     pdf.savefig()
     plt.close()
@@ -30,18 +42,33 @@ def generate_diagnositic_plots():
     pdf.savefig()
     plt.close()
 
+    plt.figure()
+    for reca in [0.4, 0.6, 0.8]:
+        frm = calc_at_varying_discount_rates(reca)
+        plt.plot(frm.DiscountRate, frm.PUF,
+                 label='%s%% Recovery' % (reca * 100))
+    plt.title('PUF vs Discount Rate')
+    plt.xlabel('Discount Rate')
+    plt.ylabel('PUF')
+    plt.legend(loc="lower right")
+    pdf.savefig()
+    plt.close()
+
     pdf.close()
 
 
 def calc_at_varying_hazard_rates(recovery=0.4):
     haz_rates = np.linspace(0.0, 0.10)
     pufs = []
+    parspreads = []
     for hz in haz_rates:
         cdsflat = generic_inputs(haz_rate=hz)
         cdsflat.recovery_rate = recovery
         val = calcs.Valuation(cdsflat)
         pufs.append(val.puf())
-    result = pd.DataFrame(dict(HazardRate=haz_rates, PUF=pufs))
+        parspreads.append(val.parspread())
+    result = pd.DataFrame(dict(HazardRate=haz_rates, PUF=pufs,
+                               ParSpread=parspreads))
     return result
 
 
@@ -57,14 +84,28 @@ def calc_at_varying_maturities():
     return result
 
 
+def calc_at_varying_discount_rates(recovery=0.4):
+    disc_rates = np.linspace(0.0, 0.10)
+    pufs = []
+    parspreads = []
+    for dr in disc_rates:
+        cdsflat = generic_inputs(disc_rate=dr)
+        cdsflat.recovery_rate = recovery
+        val = calcs.Valuation(cdsflat)
+        pufs.append(val.puf())
+        parspreads.append(val.parspread())
+    result = pd.DataFrame(dict(DiscountRate=disc_rates, PUF=pufs,
+                               ParSpread=parspreads))
+    return result
+
+
 def generic_inputs(disc_rate=0.05, haz_rate=0.0166):
     coupon = 0.01
     maturity = 5.0
     notional = 1.0
     recovery = 0.4
     cdsflat = inputs.ValuationInput(
-        coupon, maturity, notional, recovery, 
+        coupon, maturity, notional, recovery,
         inputs.FlatCurve(disc_rate), inputs.FlatCurve(haz_rate)
     )
     return cdsflat
-
